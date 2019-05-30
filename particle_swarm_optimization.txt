@@ -1,0 +1,93 @@
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <iomanip>
+#include <regex>
+#include <cstdlib>
+
+using namespace std;
+
+struct Particle {
+	double x, y, best_x, best_y, vx, vy, best_particle_func;
+};
+
+int main() {
+	cout << fixed << setprecision(7);
+	cout.flush();
+	const int n = 100; // кол-во итераций
+	const int particles = 85; // кол-во частиц
+	double swarm_x = 101, swarm_y = 101, swarm_func = 1000000000; // состояние роя
+	double best_swarm_x = 101, best_swarm_y = 101, best_swarm_func = 100000000; // лучшее состояние роя
+
+	double 
+		omega = 0.7, 
+		phi_p = 1, 
+		phi_g = 1;
+
+	int count = 0;
+
+	Particle par[particles];
+	for (int j = 0; j < particles; j++) {
+		par[j].x = (double)(rand()) / RAND_MAX * 200 - 100;
+		par[j].y = (double)(rand()) / RAND_MAX * 200 - 100;
+		par[j].best_x = par[j].x;
+		par[j].best_y = par[j].y;
+		
+		cout << "? " << par[j].best_x << " " << par[j].best_y << endl;
+		cin >> par[j].best_particle_func;
+		// par[j].best_particle_func = f(par[j].best_x, par[j].best_y);
+		// cout << par[j].best_particle_func << endl;
+
+		if (best_swarm_func > par[j].best_particle_func)
+			best_swarm_func = par[j].best_particle_func;
+
+		par[j].vx = 0;
+		par[j].vy = 0;
+		count++;
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < particles; j++) {
+			double rp = (double)(rand()) / RAND_MAX, rg = (double)(rand()) / RAND_MAX;
+
+			par[j].vx = omega * par[j].vx + phi_p * rp * (par[j].best_x - par[j].x) + phi_g * rp * (best_swarm_x - par[j].x);
+			par[j].vy = omega * par[j].vy + phi_p * rg * (par[j].best_y - par[j].y) + phi_g * rg * (best_swarm_y - par[j].y);
+
+
+
+			// cout << "v: " << par[j].vx << " " << par[j].vy << endl;
+
+			par[j].x += par[j].vx;
+			par[j].y += par[j].vy;
+
+			if (par[j].x > 100 || par[j].x < -100)
+				par[j].x = 100;
+			if (par[j].y > 100 || par[j].y < -100)
+				par[j].y = 100;
+
+
+			cout << "? " << par[j].x << " " << par[j].y << endl;
+			double particle_func;
+			cin >> particle_func;
+			// particle_func = f(par[j].x, par[j].y);
+			// cout << particle_func << endl;
+
+			if (particle_func < par[j].best_particle_func) {
+				par[j].best_particle_func = particle_func;
+				par[j].best_x = par[j].x;
+				par[j].best_y = par[j].y;
+
+				if (par[j].best_particle_func < best_swarm_func) {
+					best_swarm_func = par[j].best_particle_func;
+					best_swarm_x = par[j].best_x;
+					best_swarm_y = par[j].best_y;
+				}
+			}
+			count++;
+		}
+	}
+	//cout << count << endl;
+	//cout << best_swarm_func << endl;
+	cout << "! " << best_swarm_x << " " << best_swarm_y << endl;
+	return 0;
+}
